@@ -22,7 +22,7 @@
  *    'Sun, 17 May 1998 03:00:00 GMT+01' => Date()
  */
 function parseDataFromRfc2822(value) {
-   throw new Error('Not implemented');
+    return new Date(value);
 }
 
 /**
@@ -37,7 +37,7 @@ function parseDataFromRfc2822(value) {
  *    '2016-01-19T08:07:37Z' => Date()
  */
 function parseDataFromIso8601(value) {
-   throw new Error('Not implemented');
+    return new Date(value);
 }
 
 
@@ -56,7 +56,10 @@ function parseDataFromIso8601(value) {
  *    Date(2015,1,1)    => false
  */
 function isLeapYear(date) {
-   throw new Error('Not implemented');
+    const year = date.getFullYear();
+    return (year % 4 === 0
+            && year % 100 !== 0)
+        || (year % 400 === 0);
 }
 
 
@@ -76,14 +79,27 @@ function isLeapYear(date) {
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,15,20,10,453)   => "05:20:10.453"
  */
 function timeSpanToString(startDate, endDate) {
-   throw new Error('Not implemented');
+    // Pad to 2 or 3 digits, default is 2
+    function pad(n, z = 2) {
+        return n.toString().padStart(z, '0');
+    }
+
+    let diff = endDate.getTime() - startDate.getTime();
+    const ms = diff % 1000;
+    diff = (diff - ms) / 1000;
+    const secs = diff % 60;
+    diff = (diff - secs) / 60;
+    const mins = diff % 60;
+    const hrs = (diff - mins) / 60;
+
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}.${pad(ms, 3)}`;
 }
 
 
 /**
  * Returns the angle (in radians) between the hands of an analog clock for the specified Greenwich time.
  * If you have problem with solution please read: https://en.wikipedia.org/wiki/Clock_angle_problem
- * 
+ *
  * @param {date} date
  * @return {number}
  *
@@ -94,7 +110,13 @@ function timeSpanToString(startDate, endDate) {
  *    Date.UTC(2016,3,5,21, 0) => Math.PI/2
  */
 function angleBetweenClockHands(date) {
-    throw new Error('Not implemented');
+    const hours = date.getUTCHours() % 12;
+    const minutes = date.getUTCMinutes();
+    const angleDegrees = Math.abs(0.5 * (60 * hours - 11 * minutes));
+    const secondAngleDegrees = 360 - angleDegrees;
+    const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
+
+    return degreesToRadians(angleDegrees <= secondAngleDegrees ? angleDegrees : secondAngleDegrees);
 }
 
 
